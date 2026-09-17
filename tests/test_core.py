@@ -1,8 +1,9 @@
+from datetime import date
+
 import pytest
 import requests
-import cbar
 
-from datetime import date
+import cbar
 
 
 def test_cbar_xml():
@@ -33,10 +34,24 @@ def test_get_rates_all_currencies():
     assert "GBP" in rates["currencies"]
 
 
+def test_get_rates_preserves_order():
+    date_ = date(2024, 11, 18)
+    rates = cbar.get_rates(date_=date_, currencies=["EUR", "USD", "GBP"])
+
+    assert list(rates["currencies"].keys()) == ["EUR", "USD", "GBP"]
+
+
+def test_get_rates_lowercase_codes():
+    date_ = date(2024, 11, 18)
+    rates = cbar.get_rates(date_=date_, currencies=["usd"])
+
+    assert rates["currencies"] == {"USD": {"nominal": "1", "rate": 1.7}}
+
+
 def test_get_rates_type_error():
     with pytest.raises(
         TypeError,
-        match="Currencies must be a list of strings \(ISO 4217 currency codes\).",
+        match=r"Currencies must be a list of strings \(ISO 4217 currency codes\).",
     ):
         cbar.get_rates(currencies=1)
 
@@ -91,6 +106,25 @@ def test_convert_non_azn():
     result = cbar.convert(100, "USD", "EUR", date(2024, 11, 18))
     assert isinstance(result, float)
     assert result == 94.8714  # 1 EUR = 1.7919 AZN and 1 USD = 1.7 AZN
+
+
+def test_convert_nominal_not_one():
+    # RUB Nominal=100, Value=1.7 -> 1 RUB = 0.017 AZN
+    result = cbar.convert(100, "RUB", "AZN", date(2024, 11, 18))
+    assert isinstance(result, float)
+    assert result == 1.7
+
+
+def test_convert_nominal_not_one_non_azn():
+    # 1 RUB = 0.017 AZN, 1 USD = 1.7 AZN -> 100 RUB = 1.0 USD
+    result = cbar.convert(100, "RUB", "USD", date(2024, 11, 18))
+    assert isinstance(result, float)
+    assert result == 1.0
+
+
+def test_convert_lowercase_codes():
+    result = cbar.convert(100, "usd", "azn", date(2024, 11, 18))
+    assert result == 170.0
 
 
 def test_convert_currency_not_available():

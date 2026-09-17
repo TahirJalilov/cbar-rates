@@ -1,5 +1,5 @@
-from cbar.core import get_rates, get_rates_with_diff, convert
+from cbar.core import convert, get_rates, get_rates_with_diff
 
-__all__ = ["get_rates", "get_rates_with_diff", "convert"]
+__all__ = ["convert", "get_rates", "get_rates_with_diff"]
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"

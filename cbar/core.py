@@ -1,10 +1,11 @@
 """Core components for cbar rates."""
 
-import requests
 import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from datetime import date, timedelta
 from typing import Dict, List, Optional, Union
+
+import requests
 
 
 def _get_cbar_data(
@@ -76,11 +77,9 @@ def get_rates(
                 "Currencies must be a list of strings (ISO 4217 currency codes)."
             )
 
-        currencies_set = {s.upper() for s in currencies}
-
         rates["currencies"] = OrderedDict(
             (currency, rates["currencies"][currency])
-            for currency in currencies_set
+            for currency in dict.fromkeys(s.upper() for s in currencies)
             if currency in rates["currencies"]
         )
 
@@ -188,27 +187,26 @@ def convert(
     Raises:
         ValueError: If the source and target currencies are the same or unavailable.
     """
+    from_currency = from_currency.upper()
+    to_currency = to_currency.upper()
+
     if from_currency == to_currency:
         raise ValueError("Source and target currencies must be different.")
 
-    if from_currency == "AZN":
-        to_rate = 1
-    else:
-        rates = get_rates(date_, [from_currency])
-        if from_currency not in rates["currencies"]:
-            raise ValueError(
-                f"Currency {from_currency} is not available on {rates['date']}."
-            )
-        to_rate = rates["currencies"][from_currency]["rate"]
+    needed = [c for c in (from_currency, to_currency) if c != "AZN"]
+    rates = get_rates(date_, needed)
 
-    if to_currency == "AZN":
-        from_rate = 1
-    else:
-        rates = get_rates(date_, [to_currency])
-        if to_currency not in rates["currencies"]:
+    def unit_rate(currency: str) -> float:
+        if currency == "AZN":
+            return 1
+        if currency not in rates["currencies"]:
             raise ValueError(
-                f"Currency {to_currency} is not available on {rates['date']}."
+                f"Currency {currency} is not available on {rates['date']}."
             )
-        from_rate = rates["currencies"][to_currency]["rate"]
+        data = rates["currencies"][currency]
+        return data["rate"] / float(data["nominal"])
+
+    to_rate = unit_rate(from_currency)
+    from_rate = unit_rate(to_currency)
 
     return round(amount * to_rate / from_rate, 4)
