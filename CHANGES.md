@@ -7,6 +7,7 @@
 * `convert` now fetches both currencies in a single request instead of two.
 * `get_rates` now preserves the order of the input `currencies` list.
 * Added official support for Python 3.14.
+* Dropped support for end-of-life Python 3.7 and 3.8; the minimum is now 3.9.
 
 ## v1.3.0 (2024-12-18)
 

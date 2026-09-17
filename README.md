@@ -15,7 +15,7 @@ A Python library to work with Azerbaijani manat (AZN) official exchange rates ba
 
 ## Requirements
 
-- Python 3.7 or higher
+- Python 3.9 or higher
 - `requests` library
 
 ## Installation
