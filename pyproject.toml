@@ -35,7 +35,6 @@ classifiers = [
     "Typing :: Typed",
 ]
 dependencies = [
-    "typing_extensions >= 4.7.0; python_version < '3.9'",
     "requests >= 2.20.0"
 ]
 dynamic = ["version"]
@@ -47,7 +46,7 @@ Issues = "https://github.com/TahirJalilov/cbar-rates/issues"
 Changelog = "https://github.com/TahirJalilov/cbar-rates/blob/main/CHANGES.md"
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4.4"]
+dev = ["pytest>=7.4.4", "ruff"]
 
 [tool.setuptools.packages.find]
 include = ["cbar*"]
